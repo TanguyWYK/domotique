@@ -1,0 +1,44 @@
+# On suit les liens symboliques
+Options +FollowSymlinks
+# Blocages des url
+Options -Indexes
+
+# Activation du mode rewrite d'Apache
+RewriteEngine On
+
+
+# Réécriture des URL
+RewriteRule ^$  app/controllers/home.php [L]
+RewriteRule ^home$  app/controllers/home.php [L]
+RewriteRule ^save$  app/controllers/save.php [L]
+RewriteRule ^login$  app/controllers/login.php [L]
+
+# Autorisation de connexion API
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+</IfModule>
+
+# Redirection pour la favicon
+RewriteRule ^favicon.ico$ public/images/site/favicon-32x32.png [NC,L]
+
+# BEGIN Cache-Control Headers
+<IfModule mod_headers.c>
+ <FilesMatch "\.(ico|jpe?g|png|gif|swf|gz|ttf|woff2|webp|svg)$">
+ Header set Cache-Control "max-age=31536000, public"
+ </FilesMatch>
+ <FilesMatch "\.(css)$">
+ Header set Cache-Control "max-age=31536000, public"
+ </FilesMatch>
+ <FilesMatch "\.(js)$">
+ Header set Cache-Control "max-age=31536000, private"
+ </FilesMatch>
+ <FilesMatch "\.(html|phtml)$">
+ Header unset Cache-Control
+ </FilesMatch>
+ # Disable caching for scripts and other dynamic files
+ <FilesMatch "\.(php)$">
+ Header unset Cache-Control
+ </FilesMatch>
+</IfModule>
+# END Cache-Control Headers
+

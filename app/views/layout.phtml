@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="Description" content="Ici le contenu">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="shortcut icon" href="public/images/site/favicon-32x32.png">
+        <link rel="stylesheet" type="text/css" href="public/css/style.css"/>
+        <title>Ici le titre</title>
+    </head>
+    <body>
+        <header>
+
+        </header>
+        <div class="container">
+            <main>
+                <?php if(isset($template) && $template !==""): ?>
+                    <?php include $template . '.phtml' ?>
+                <?php endif; ?>
+            </main>
+        </div>
+
+        <footer>
+
+        </footer>
+        <script src="public/js/main.js"></script>
+    </body>
+</html>
