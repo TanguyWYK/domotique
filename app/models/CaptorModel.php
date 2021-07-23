@@ -17,12 +17,13 @@ class CaptorModel
     public function getLastMeasureDHT11($id_captor)
     {
         include RELATIVE_PATH['database'] . 'connection.php';
-        $query = $db->prepare("SELECT temperature,humidity FROM ".$db_prefix."dht11
-                                WHERE id_captor = ?
-                                ORDER by id DESC LIMIT 1");
+        $query = $db->prepare("SELECT temperature, humidity, date
+                                FROM ".$db_prefix."dht11 
+                                WHERE id = (SELECT MAX(id) FROM ".$db_prefix."dht11 WHERE id_captor = ?)");
         $query->execute([
             $id_captor,
         ]);
         return $query->fetch();
     }
+
 }

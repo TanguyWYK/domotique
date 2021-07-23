@@ -62,6 +62,7 @@ function encodeURIObject(data) {
  * @param {{
         temperature: string,
         humidity: string,
+        date: string
      }} data
  */
 function updatePanel() {
@@ -71,8 +72,10 @@ function updatePanel() {
     }).then(data => {
         let temperature = (data.temperature / 100).toFixed(2);
         let humidity = (data.humidity / 100).toFixed(2);
+        let date = data.date.split(' ')[1];
         document.getElementById('temperature').innerText = temperature;
         document.getElementById('humidity').innerText = humidity;
+        document.getElementById('date').innerText = date;
     });
 }
 updatePanel();
