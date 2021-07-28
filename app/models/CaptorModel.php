@@ -26,4 +26,15 @@ class CaptorModel
         return $query->fetch();
     }
 
+    public function getNLastMeasuresDHT11($id_captor,$n){
+        include RELATIVE_PATH['database'] . 'connection.php';
+        $query = $db->prepare("SELECT temperature, humidity, date
+                                FROM ".$db_prefix."dht11
+                                WHERE id_captor = ? ORDER BY id DESC LIMIT ".$n);
+        $query->execute([
+            $id_captor,
+        ]);
+        return $query->fetchAll();
+    }
+
 }

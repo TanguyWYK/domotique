@@ -4,6 +4,7 @@ const RELATIVE_PATH = {
     controllers: 'app/controllers/',
     views: 'app/views/',
 };
+let Display = false;
 
 function getXHR_url(url, parameters = {}) {
     return new Promise(resolve => {
@@ -57,25 +58,15 @@ function encodeURIObject(data) {
     return encodeURI(response.join('&'));
 }
 
-/**
- *
- * @param {{
-        temperature: string,
-        humidity: string,
-        date: string
-     }} data
- */
-function updatePanel() {
+function loadView(){
     postXHR('home', {
         action: 'readCaptors',
         id_captor: 1,
+        numberOfMeasures: 150,
     }).then(data => {
-        let temperature = (data.temperature / 100).toFixed(2);
-        let humidity = (data.humidity / 100).toFixed(2);
-        let date = data.date.split(' ')[1];
-        document.getElementById('temperature').innerText = temperature;
-        document.getElementById('humidity').innerText = humidity;
-        document.getElementById('date').innerText = date;
+        displayPanel(data);
+        displayGraph(data);
     });
 }
-updatePanel();
+
+loadView();
