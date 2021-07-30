@@ -58,15 +58,29 @@ function encodeURIObject(data) {
     return encodeURI(response.join('&'));
 }
 
-function loadView(){
+function loadView() {
+    let now = new Date();
+    let yesterday = now.setHours(now.getHours() - 24);
     postXHR('home', {
         action: 'readCaptors',
         id_captor: 1,
-        numberOfMeasures: 150,
+        date_start: convertDateToMySQL(yesterday),
+        date_end: convertDateToMySQL(Date.now()),
     }).then(data => {
+        console.log(data);
         displayPanel(data);
         displayGraph(data);
     });
+}
+
+function convertDateToMySQL(date) {
+    return (new Date(addHoursToDate(date, 2)).toISOString()).slice(0, 19).replace('T', ' ');
+}
+
+function addHoursToDate(date, hours) {
+    let dateTime = new Date(date);
+    dateTime.setHours(dateTime.getHours() + hours);
+    return dateTime;
 }
 
 loadView();

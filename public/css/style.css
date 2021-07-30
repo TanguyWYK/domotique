@@ -1,21 +1,25 @@
-section{
+section {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-#led_div{
+ul {
+    list-style: none;
+}
+
+#led_div {
     display: flex;
     align-items: center;
     flex-direction: column;
 }
 
-#ledSwitch{
+#ledSwitch {
     width: 40px;
     height: 40px;
 }
 
-#led{
+#led {
     border-radius: 50%;
     border: 1px black solid;
     width: 100px;
@@ -24,6 +28,30 @@ section{
     margin: 20px;
 }
 
-#led.ledOn{
+#led.ledOn {
     background-color: greenyellow;
+}
+
+label {
+    display: inline-block;
+    width: 100px;
+}
+
+li {
+    margin-bottom: 10px;
+}
+
+.button{
+    background-color: rgb(60, 133, 65);
+    border: none;
+    padding: 6px 10px;
+    color: #fff;
+    border-radius: 3px;
+    display: inline-block;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.button:hover {
+    box-shadow: 0 0 5px #000;
 }
