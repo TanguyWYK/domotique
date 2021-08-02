@@ -40,7 +40,7 @@ function displayPanel(measures) {
                 this.date = new Date(data.date);
             },
             lastMeasure() {
-                return this.measures[0];
+                return this.measures[this.numberOfMeasures - 1];
             }
         },
 

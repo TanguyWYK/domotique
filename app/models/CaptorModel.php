@@ -44,7 +44,7 @@ class CaptorModel
         $query = $db->prepare("SELECT temperature, humidity, date
                                 FROM " . $db_prefix . "dht11
                                 WHERE id_captor = ? AND date BETWEEN ? AND ? 
-                                ORDER by date DESC");
+                                ORDER by date");
         $query->execute([
             $id_captor,
             $date_start,

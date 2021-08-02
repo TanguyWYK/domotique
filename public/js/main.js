@@ -67,7 +67,6 @@ function loadView() {
         date_start: convertDateToMySQL(yesterday),
         date_end: convertDateToMySQL(Date.now()),
     }).then(data => {
-        console.log(data);
         displayPanel(data);
         displayGraph(data);
     });

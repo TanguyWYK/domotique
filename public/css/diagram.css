@@ -1,0 +1,29 @@
+.axis_Diagram {
+    stroke: black;
+    stroke-width: 1;
+    fill: none;
+}
+
+svg {
+    shape-rendering: crispEdges;
+}
+
+.axisArrow_Diagram {
+    stroke: #444;
+    fill: black;
+    shape-rendering: auto;
+}
+
+.graphLine_Diagram {
+    fill: none;
+}
+
+.dashedLine_Diagram {
+    stroke-dasharray: 8 2;
+    stroke: #777;
+}
+
+.lightLine_Diagram {
+    stroke: #999;
+    stroke-width: 0.5;
+}

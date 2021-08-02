@@ -1,58 +1,108 @@
 'use strict';
 
 function displayGraph(measures) {
-    let panel = new Vue({
+    let graph = new Vue({
         el: '#graph',
         data: {
             measures: measures,
             dateStart: 0,
             dateEnd: 0,
+            optionsTemperature: {
+                title: 'Température',
+                id: 'temperature',
+                size_px: {x: 500, y: 500},
+                axis: {
+                    x: {
+                        legend: 'temps',
+                        min: -10,
+                        max: 200,
+                    },
+                    y: {
+                        legend: 'température',
+                        min: 0,
+                        max: 45,
+                    },
+                    crossing: {x: 0, y: 0},
+                },
+                verticalLines: [],
+                horizontalLines: [
+                    {y: 10, classStyle: 'lightLine_Diagram'},
+                    {y: 20, classStyle: 'lightLine_Diagram'},
+                    {y: 30, classStyle: 'lightLine_Diagram'},
+                    {y: 40, classStyle: 'lightLine_Diagram'},
+                ],
+            },
+            optionsHumidity: {
+                title: '% Humidité',
+                id: 'humidity',
+                size_px: {x: 500, y: 500},
+                axis: {
+                    x: {
+                        legend: 'temps',
+                        min: -10,
+                        max: 200,
+                    },
+                    y: {
+                        legend: 'humidité',
+                        min: 0,
+                        max: 100,
+                    },
+                    crossing: {x: 0, y: 0},
+                },
+                verticalLines: [],
+                horizontalLines: [
+                    {y: 40, classStyle: 'dashedLine_Diagram'},
+                    {y: 60, classStyle: 'dashedLine_Diagram'},
+                ],
+            },
         },
         template: `<section>
-                    <div id="dateList_id">
-                        <ul>
-                            <li>
-                                <label for="startDate">début</label>
-                                <input id="startDate" type="datetime-local" v-model="dateStart">
-                            </li>
-                            <li>
-                                <label for="endDate">fin</label>
-                                <input id="endDate" type="datetime-local" v-model="dateEnd">
-                            </li>
-                            <li>
-                               <div class="button" @click="updateGraph()">Afficher</div>
-                            </li>
-                        </ul>
-                    </div>
-                     <svg height="510" width="510">
-                        <line x1="5" y1="505" x2="505" y2="505" style="stroke:#000;stroke-width:1" />
-                        <line x1="5" y1="505" x2="5" y2="5" style="stroke:#000;stroke-width:1" />
-                        <circle v-for="(measure,index) in measures" :key="measures.index" 
-                            :cx="getPositionX(measure)" 
-                            :cy="getHumidityPositionY(measure)" 
-                            r="1.5" fill="blue" />
-                        <circle v-for="(measure,index) in measures" :key="measures.index" 
-                            :cx="getPositionX(measure)" 
-                            :cy="getTemperaturePositionY(measure)" 
-                            r="1.5" fill="red" />
-                    </svg>
-                </section>`,
-        computed: {},
+                <div id="dateList_id">
+                    <ul>
+                        <li>
+                            <label for="startDate">début</label>
+                            <input id="startDate" type="datetime-local" v-model="dateStart">
+                        </li>
+                        <li>
+                            <label for="endDate">fin</label>
+                            <input id="endDate" type="datetime-local" v-model="dateEnd">
+                        </li>
+                        <li>
+                           <div class="button" @click="updateGraph()">Afficher</div>
+                        </li>
+                    </ul>
+                </div>
+                <div id="diagrams">
+                </div>
+            </section>`,
         mounted() {
             this.dateStart = this.fillInputDateNowMinusHours(24);
             this.dateEnd = this.fillInputDateNowMinusHours(0);
+            this.updateGraph();
+        },
+        computed: {
+            temperatureValues() {
+                let values = {points: [], color: 'red'};
+                for (let measure of this.measures) {
+                    values.points.push({
+                        x: measure.dateTime,
+                        y: measure.temperature / 100,
+                    })
+                }
+                return [values];
+            },
+            humidityValues() {
+                let values = {points: [], color: 'blue'};
+                for (let measure of this.measures) {
+                    values.points.push({
+                        x: measure.dateTime,
+                        y: measure.humidity / 100,
+                    })
+                }
+                return [values];
+            }
         },
         methods: {
-            getHumidityPositionY(measure) {
-                return 510 - measure.humidity / 100 * 5;
-            },
-            getTemperaturePositionY(measure) {
-                return 510 - measure.temperature / 100 * 5;
-            },
-            getPositionX(measure) {
-                let date = new Date(measure.date);
-                return (date.getHours() * 60 + date.getMinutes()) / (60 * 24) * 500 + 10;
-            },
             fillInputDateNowMinusHours(hours = 0) {
                 let now = new Date();
                 now.setHours(now.getHours() + 2 - hours);
@@ -66,8 +116,41 @@ function displayGraph(measures) {
                     date_end: convertDateToMySQL(this.dateEnd),
                 }).then(data => {
                     this.measures = data;
+                    this.initXAxis();
+                    let diagram_div = document.getElementById('diagrams');
+                    diagram_div.innerHTML = '';
+                    let temperatureDiagram = new Diagram(this.optionsTemperature, this.temperatureValues);
+                    diagram_div.append(temperatureDiagram.getDiagramElement());
+                    let humidityDiagram = new Diagram(this.optionsHumidity, this.humidityValues);
+                    diagram_div.append(humidityDiagram.getDiagramElement())
+                    console.log('update');
                 });
             },
-        },
+            initXAxis() {
+                this.changeXAxis(this.optionsTemperature);
+                this.changeXAxis(this.optionsHumidity);
+                for (let measure of this.measures) {
+                    measure.dateTime = new Date(measure.date).getTime();
+                }
+                this.addVerticalLineByDay(this.optionsTemperature);
+                this.addVerticalLineByDay(this.optionsHumidity);
+            },
+            changeXAxis(options) {
+                options.axis.x.min = new Date(this.dateStart).getTime();
+                options.axis.x.max = new Date(this.dateEnd).getTime();
+                options.axis.crossing.x = options.axis.x.min;
+            },
+            addVerticalLineByDay(options) {
+                let dateTime = options.axis.x.min;
+                while (dateTime < options.axis.x.max) {
+                    dateTime += 1000 * 3600 * 24;
+                    let date = new Date(dateTime);
+                    date.setHours(0);
+                    date.setMinutes(0);
+                    date.setSeconds(0);
+                    options.verticalLines.push({x: date.getTime(), classStyle: 'lightLine_Diagram'})
+                }
+            }
+        }
     });
 }
