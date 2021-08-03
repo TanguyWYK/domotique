@@ -8,29 +8,6 @@ ul {
     list-style: none;
 }
 
-#led_div {
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-}
-
-#ledSwitch {
-    width: 40px;
-    height: 40px;
-}
-
-#led {
-    border-radius: 50%;
-    border: 1px black solid;
-    width: 100px;
-    height: 100px;
-    background-color: whitesmoke;
-    margin: 20px;
-}
-
-#led.ledOn {
-    background-color: greenyellow;
-}
 
 label {
     display: inline-block;
@@ -39,6 +16,12 @@ label {
 
 li {
     margin-bottom: 10px;
+}
+
+#diagrams{
+    display: flex;
+    flex-direction: column;
+    align-content: center;
 }
 
 .button{

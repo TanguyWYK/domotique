@@ -1,4 +1,4 @@
-.axis_Diagram {
+.axis_Diagram, .graduation_Diagram {
     stroke: black;
     stroke-width: 1;
     fill: none;
@@ -26,4 +26,12 @@ svg {
 .lightLine_Diagram {
     stroke: #999;
     stroke-width: 0.5;
+}
+
+.title_Diagram {
+    text-anchor: middle;
+}
+
+.legendAxis_Diagram {
+    text-anchor: end;
 }

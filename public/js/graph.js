@@ -10,17 +10,21 @@ function displayGraph(measures) {
             optionsTemperature: {
                 title: 'Température',
                 id: 'temperature',
-                size_px: {x: 500, y: 500},
+                size_px: {x: 1000, y: 500},
                 axis: {
                     x: {
-                        legend: 'temps',
+                        legend: 't',
                         min: -10,
                         max: 200,
+                        step1: 1000*3600*12,
+                        step2: 1000*3600,
                     },
                     y: {
-                        legend: 'température',
-                        min: 0,
+                        legend: 'temp. °C',
+                        min: -11.32,
                         max: 45,
+                        step1: 5,
+                        step2: 1,
                     },
                     crossing: {x: 0, y: 0},
                 },
@@ -33,19 +37,23 @@ function displayGraph(measures) {
                 ],
             },
             optionsHumidity: {
-                title: '% Humidité',
+                title: 'Humidité',
                 id: 'humidity',
-                size_px: {x: 500, y: 500},
+                size_px: {x: 1000, y: 500},
                 axis: {
                     x: {
-                        legend: 'temps',
+                        legend: 't',
                         min: -10,
                         max: 200,
+                        step1: 1000*3600*12,
+                        step2: 1000*3600,
                     },
                     y: {
-                        legend: 'humidité',
+                        legend: '% humidité',
                         min: 0,
                         max: 100,
+                        step1: 10,
+                        step2: 1,
                     },
                     crossing: {x: 0, y: 0},
                 },
