@@ -60,15 +60,12 @@ function encodeURIObject(data) {
 
 function loadView() {
     let now = new Date();
-    let yesterday = now.setHours(now.getHours() - 24);
     postXHR('home', {
-        action: 'readCaptors',
+        action: 'readLastMeasures',
         id_captor: 1,
-        date_start: convertDateToMySQL(yesterday),
-        date_end: convertDateToMySQL(Date.now()),
     }).then(data => {
         displayPanel(data);
-        displayGraph(data);
+        displayGraph([]);
     });
 }
 

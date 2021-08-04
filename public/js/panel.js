@@ -20,8 +20,8 @@ function displayPanel(measures) {
                 </section>`,
         computed: {
             date() {
-                let date = new Date(this.lastMeasure().date);
-                let twoDigit = x => ("0" + x).slice(-2);
+                let date = new Date(this.lastMeasure()['date']);
+                let twoDigit = x => ('0' + x).slice(-2);
                 return twoDigit(date.getHours()) + ':' +
                     twoDigit(date.getMinutes()) + ':' +
                     twoDigit(date.getSeconds());
@@ -34,11 +34,6 @@ function displayPanel(measures) {
             },
         },
         methods: {
-            updatePanel(data) {
-                this.temperature = (data.temperature / 100).toFixed(2);
-                this.humidity = (data.humidity / 100).toFixed(2);
-                this.date = new Date(data.date);
-            },
             lastMeasure() {
                 return this.measures[this.numberOfMeasures - 1];
             }

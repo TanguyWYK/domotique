@@ -4,7 +4,7 @@ class Diagram {
 
     constructor(options, values = []) {
         this.HEIGHT_TITLE = 100;
-        this.PADDING_BOTTOM = 30;
+        this.PADDING_BOTTOM = 80;
         this.PADDING_LEFT = 80;
         this.PADDING_RIGHT = 20;
         this.title = options.title;
@@ -68,13 +68,28 @@ class Diagram {
 
     drawExtraLines() {
         for (let line of this.horizontalLines) {
-            this.drawHorizontalLine(this.convertInPixelY(line.y), line.classStyle);
-            // TODO attention à l'offset
-            this.drawText(this.PADDING_LEFT - 10, this.convertInPixelY(line.y) + 2, 12, 'legendAxis_Diagram', line.y);
+            this.drawHorizontalLine(this.convertInPixelY(line.position), line.classStyle);
+            this.drawText(
+                this.convertInPixelX(this.axis.crossing.x) - 10,
+                this.convertInPixelY(line.position) + 2,
+                12,
+                'legendAxis_Diagram',
+                this.getLineText(line));
         }
         for (let line of this.verticalLines) {
-            this.drawVerticalLine(this.convertInPixelX(line.x), line.classStyle);
+            this.drawVerticalLine(this.convertInPixelX(line.position), line.classStyle);
+            this.drawTextRotate(
+                this.convertInPixelX(line.position) + 5,
+                this.convertInPixelY(this.axis.crossing.y) + 12,
+                14,
+                -75,
+                'legendAxis_Diagram',
+                this.getLineText(line));
         }
+    }
+
+    getLineText(line) {
+        return line.hasOwnProperty('name_substitution') ? line.name_substitution : line.position;
     }
 
     drawAxis() {
@@ -85,23 +100,23 @@ class Diagram {
         this.drawVerticalLine(x, 'axis_Diagram');
         this.drawArrowY(x, this.HEIGHT_TITLE);
         this.drawText(this.PADDING_LEFT + this.size_px.x, y + 20, 16, 'legendAxis_Diagram', this.axis.x.legend);
-        this.drawTextRotate90(this.PADDING_LEFT - 25, this.HEIGHT_TITLE, 16, 'legendAxis_Diagram', this.axis.y.legend);
+        this.drawTextRotate(this.PADDING_LEFT - 20, this.HEIGHT_TITLE - 20, 16, -90, 'legendAxis_Diagram', this.axis.y.legend);
         this.drawSteps();
     }
 
     drawSteps() {
-        let offsetX = this.axis.x.min - this.axis.x.min % this.axis.x.step2 + this.axis.x.step2
+        let offsetX = this.axis.x.min - this.axis.x.min % this.axis.x.step2 + this.axis.x.step2;
         for (let i = offsetX; i < this.axis.x.max; i += this.axis.x.step2) {
             let x = this.convertInPixelX(i);
             let y = this.convertInPixelY(this.axis.crossing.y);
-            let length = (i - offsetX) % this.axis.x.step1 === 0 ? 8 : 3;
+            let length = (i + offsetX - this.axis.x.step2) % this.axis.x.step1 === 0 ? 8 : 3;
             this.drawLine(x, y, x, y + length, 'graduation_Diagram');
         }
-        // TODO ajouter offset y
-        for (let i = this.axis.y.min; i < this.axis.y.max; i += this.axis.y.step2) {
+        let offsetY = this.axis.y.min - this.axis.y.min % this.axis.y.step2 + this.axis.y.step2;
+        for (let i = offsetY; i < this.axis.y.max; i += this.axis.y.step2) {
             let x = this.convertInPixelX(this.axis.crossing.x);
             let y = this.convertInPixelY(i);
-            let length = (i - this.axis.y.min) % this.axis.y.step1 === 0 ? 8 : 3;
+            let length = i % this.axis.y.step1 === 0 ? 8 : 3;
             this.drawLine(x - length, y, x, y, 'graduation_Diagram');
         }
     }
@@ -168,16 +183,15 @@ class Diagram {
         this.svgElement.appendChild(textElement);
     }
 
-    drawTextRotate90(x, y, fontSize, classStyle, text) {
+    drawTextRotate(x, y, fontSize, angle, classStyle, text) {
         let textElement = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         textElement.setAttribute('x', x);
         textElement.setAttribute('y', y);
         textElement.setAttribute('font-size', fontSize);
         textElement.setAttribute('class', classStyle);
         textElement.setAttribute('style',
-            'transform: translateY(' + (2 * this.HEIGHT_TITLE) + 'px) ' +
-            'rotate(-90deg) ' +
-            'translate(' + (this.HEIGHT_TITLE - 10) + 'px, ' + (-35) + 'px)');
+            'transform-origin: ' + x + 'px ' + y + 'px;' +
+            'transform: rotate(' + angle + 'deg)');
         textElement.textContent = text;
         this.svgElement.appendChild(textElement);
     }

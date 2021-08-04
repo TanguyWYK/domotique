@@ -14,15 +14,15 @@ function displayGraph(measures) {
                 axis: {
                     x: {
                         legend: 't',
-                        min: -10,
-                        max: 200,
-                        step1: 1000*3600*12,
-                        step2: 1000*3600,
+                        min: 0,
+                        max: 0,
+                        step1: 1000 * 3600 * 12,
+                        step2: 1000 * 3600,
                     },
                     y: {
                         legend: 'temp. °C',
-                        min: -11.32,
-                        max: 45,
+                        min: 0,
+                        max: 40,
                         step1: 5,
                         step2: 1,
                     },
@@ -30,10 +30,10 @@ function displayGraph(measures) {
                 },
                 verticalLines: [],
                 horizontalLines: [
-                    {y: 10, classStyle: 'lightLine_Diagram'},
-                    {y: 20, classStyle: 'lightLine_Diagram'},
-                    {y: 30, classStyle: 'lightLine_Diagram'},
-                    {y: 40, classStyle: 'lightLine_Diagram'},
+                    {position: 10, classStyle: 'lightLine_Diagram'},
+                    {position: 20, classStyle: 'lightLine_Diagram'},
+                    {position: 30, classStyle: 'lightLine_Diagram'},
+                    {position: 40, classStyle: 'lightLine_Diagram'},
                 ],
             },
             optionsHumidity: {
@@ -43,10 +43,10 @@ function displayGraph(measures) {
                 axis: {
                     x: {
                         legend: 't',
-                        min: -10,
-                        max: 200,
-                        step1: 1000*3600*12,
-                        step2: 1000*3600,
+                        min: 0,
+                        max: 0,
+                        step1: 1000 * 3600 * 12,
+                        step2: 1000 * 3600,
                     },
                     y: {
                         legend: '% humidité',
@@ -59,8 +59,8 @@ function displayGraph(measures) {
                 },
                 verticalLines: [],
                 horizontalLines: [
-                    {y: 40, classStyle: 'dashedLine_Diagram'},
-                    {y: 60, classStyle: 'dashedLine_Diagram'},
+                    {position: 40, classStyle: 'dashedLine_Diagram'},
+                    {position: 60, classStyle: 'dashedLine_Diagram'},
                 ],
             },
         },
@@ -118,21 +118,24 @@ function displayGraph(measures) {
             },
             updateGraph() {
                 postXHR('home', {
-                    action: 'readCaptors',
+                    action: 'readCaptorsDayAverage',
                     id_captor: 1,
                     date_start: convertDateToMySQL(this.dateStart),
                     date_end: convertDateToMySQL(this.dateEnd),
                 }).then(data => {
                     this.measures = data;
-                    this.initXAxis();
-                    let diagram_div = document.getElementById('diagrams');
-                    diagram_div.innerHTML = '';
-                    let temperatureDiagram = new Diagram(this.optionsTemperature, this.temperatureValues);
-                    diagram_div.append(temperatureDiagram.getDiagramElement());
-                    let humidityDiagram = new Diagram(this.optionsHumidity, this.humidityValues);
-                    diagram_div.append(humidityDiagram.getDiagramElement())
-                    console.log('update');
+                    this.updateSVGDiagrams();
                 });
+            },
+            updateSVGDiagrams(){
+                this.initXAxis();
+                let diagram_div = document.getElementById('diagrams');
+                diagram_div.innerHTML = '';
+                let temperatureDiagram = new Diagram(this.optionsTemperature, this.temperatureValues);
+                diagram_div.append(temperatureDiagram.getDiagramElement());
+                let humidityDiagram = new Diagram(this.optionsHumidity, this.humidityValues);
+                diagram_div.append(humidityDiagram.getDiagramElement());
+                console.log('update');
             },
             initXAxis() {
                 this.changeXAxis(this.optionsTemperature);
@@ -150,15 +153,24 @@ function displayGraph(measures) {
             },
             addVerticalLineByDay(options) {
                 let dateTime = options.axis.x.min;
+                options.verticalLines = [];
                 while (dateTime < options.axis.x.max) {
                     dateTime += 1000 * 3600 * 24;
                     let date = new Date(dateTime);
                     date.setHours(0);
                     date.setMinutes(0);
                     date.setSeconds(0);
-                    options.verticalLines.push({x: date.getTime(), classStyle: 'lightLine_Diagram'})
+                    options.verticalLines.push({
+                        position: date.getTime(),
+                        classStyle: 'lightLine_Diagram',
+                        name_substitution: this.convertToLocalDate(date),
+                    })
                 }
+            },
+            convertToLocalDate(date){
+                return ('0'+date.getDate()).slice(-2) +'/'+('0'+(date.getMonth()+1)).slice(-2)+'/'+(''+date.getFullYear()).slice(2);
             }
         }
     });
+    return graph;
 }

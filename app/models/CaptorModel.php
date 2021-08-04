@@ -53,4 +53,20 @@ class CaptorModel
         return $query->fetchAll();
     }
 
+    public function getDayAverageMeasuresBetweenTwoDate($id_captor, $date_start, $date_end)
+    {
+        include RELATIVE_PATH['database'] . 'connection.php';
+        $query = $db->prepare("SELECT ROUND(AVG(temperature)) as temperature, ROUND(AVG(humidity)) as humidity, CAST(date as date) as date
+                                FROM " . $db_prefix . "dht11
+                                WHERE id_captor = ? AND date BETWEEN ? AND ? 
+                                GROUP BY CAST(date as date)
+                                ORDER BY date");
+        $query->execute([
+            $id_captor,
+            $date_start,
+            $date_end,
+        ]);
+        return $query->fetchAll();
+    }
+
 }

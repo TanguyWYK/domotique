@@ -16,6 +16,7 @@ svg {
 
 .graphLine_Diagram {
     fill: none;
+    stroke-width: 1.3;
 }
 
 .dashedLine_Diagram {
