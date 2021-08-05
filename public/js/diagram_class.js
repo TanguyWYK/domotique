@@ -8,6 +8,7 @@ class Diagram {
         this.PADDING_LEFT = 80;
         this.PADDING_RIGHT = 20;
         this.title = options.title;
+        this.graph = options.graph;
         this.size_px = {
             x: options.size_px.x,
             y: options.size_px.y,
@@ -50,6 +51,14 @@ class Diagram {
     }
 
     drawValues() {
+        if (this.graph.type === 'polyline') {
+            this.drawValuesPath();
+        } else if (this.graph.type === 'histogram') {
+            this.drawValuesHistogram();
+        }
+    }
+
+    drawValuesPath() {
         for (let values of this.values) {
             let pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             let textPath = 'M';
@@ -64,6 +73,27 @@ class Diagram {
             pathElement.setAttribute('class', 'graphLine_Diagram');
             this.svgElement.appendChild(pathElement);
         }
+    }
+
+    drawValuesHistogram() {
+        for (let values of this.values) {
+            for (let value of values.points) {
+                let point = this.getPositionPixels(value);
+                let height = this.convertInPixelY(this.axis.crossing.y) - point.y;
+                let width = this.convertWidthInPixelX(3600 * 22 * 1000);
+                this.drawRect(point.x, point.y, width, height, this.graph.classStyle);
+            }
+        }
+    }
+
+    drawRect(x, y, width, height, classStyle) {
+        let rectElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rectElement.setAttribute('x', '' + (x - width / 2));
+        rectElement.setAttribute('y', y);
+        rectElement.setAttribute('width', width);
+        rectElement.setAttribute('height', height);
+        rectElement.setAttribute('class', classStyle);
+        this.svgElement.appendChild(rectElement);
     }
 
     drawExtraLines() {
@@ -109,7 +139,7 @@ class Diagram {
         for (let i = offsetX; i < this.axis.x.max; i += this.axis.x.step2) {
             let x = this.convertInPixelX(i);
             let y = this.convertInPixelY(this.axis.crossing.y);
-            let length = (i + offsetX - this.axis.x.step2) % this.axis.x.step1 === 0 ? 8 : 3;
+            let length = i % this.axis.x.step1 === 0 ? 8 : 3;
             this.drawLine(x, y, x, y + length, 'graduation_Diagram');
         }
         let offsetY = this.axis.y.min - this.axis.y.min % this.axis.y.step2 + this.axis.y.step2;
@@ -135,9 +165,9 @@ class Diagram {
         let lineElement = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         lineElement.setAttribute('class', classStyle);
         lineElement.setAttribute('x1', this.PADDING_LEFT);
-        lineElement.setAttribute('y1', '' + y);
+        lineElement.setAttribute('y1', y);
         lineElement.setAttribute('x2', this.PADDING_LEFT + this.size_px.x);
-        lineElement.setAttribute('y2', '' + y);
+        lineElement.setAttribute('y2', y);
         this.svgElement.appendChild(lineElement);
     }
 
@@ -203,6 +233,10 @@ class Diagram {
 
     convertInPixelX(x) {
         return Math.round((this.PADDING_LEFT + this.size_px.x / (this.axis.x.max - this.axis.x.min) * (x - this.axis.x.min)) * 100) / 100;
+    }
+
+    convertWidthInPixelX(width) {
+        return Math.round((this.size_px.x / (this.axis.x.max - this.axis.x.min) * width) * 100) / 100;
     }
 
     convertInPixelY(y) {

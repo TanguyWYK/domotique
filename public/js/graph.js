@@ -9,6 +9,7 @@ function displayGraph(measures) {
             dateEnd: 0,
             optionsTemperature: {
                 title: 'Température',
+                graph: {type: 'histogram', classStyle: 'histogram_Diagram redDiagram'},
                 id: 'temperature',
                 size_px: {x: 1000, y: 500},
                 axis: {
@@ -38,6 +39,7 @@ function displayGraph(measures) {
             },
             optionsHumidity: {
                 title: 'Humidité',
+                graph: {type: 'histogram', classStyle: 'histogram_Diagram blueDiagram'},
                 id: 'humidity',
                 size_px: {x: 1000, y: 500},
                 axis: {
@@ -127,7 +129,7 @@ function displayGraph(measures) {
                     this.updateSVGDiagrams();
                 });
             },
-            updateSVGDiagrams(){
+            updateSVGDiagrams() {
                 this.initXAxis();
                 let diagram_div = document.getElementById('diagrams');
                 diagram_div.innerHTML = '';
@@ -141,14 +143,21 @@ function displayGraph(measures) {
                 this.changeXAxis(this.optionsTemperature);
                 this.changeXAxis(this.optionsHumidity);
                 for (let measure of this.measures) {
-                    measure.dateTime = new Date(measure.date).getTime();
+                    if (this.isOnlyDate(measure.date)) {
+                        measure.dateTime = new Date(measure.date + ' 14:00:00').getTime();
+                    } else {
+                        measure.dateTime = new Date(measure.date).getTime();
+                    }
                 }
                 this.addVerticalLineByDay(this.optionsTemperature);
                 this.addVerticalLineByDay(this.optionsHumidity);
             },
+            isOnlyDate(date) {
+                return /^\d{4}-\d{2}-\d{2}$/.test(date);
+            },
             changeXAxis(options) {
-                options.axis.x.min = new Date(this.dateStart).getTime();
-                options.axis.x.max = new Date(this.dateEnd).getTime();
+                options.axis.x.min = this.floorDay(this.dateStart).getTime();
+                options.axis.x.max = this.ceilDay(this.dateEnd).getTime();
                 options.axis.crossing.x = options.axis.x.min;
             },
             addVerticalLineByDay(options) {
@@ -161,14 +170,32 @@ function displayGraph(measures) {
                     date.setMinutes(0);
                     date.setSeconds(0);
                     options.verticalLines.push({
-                        position: date.getTime(),
+                        position: date.getTime() + 2 * 3600 * 1000,
                         classStyle: 'lightLine_Diagram',
                         name_substitution: this.convertToLocalDate(date),
                     })
                 }
             },
-            convertToLocalDate(date){
-                return ('0'+date.getDate()).slice(-2) +'/'+('0'+(date.getMonth()+1)).slice(-2)+'/'+(''+date.getFullYear()).slice(2);
+            convertToLocalDate(date) {
+                return ('0' + date.getDate()).slice(-2) + '/' + ('0' + (date.getMonth() + 1)).slice(-2) + '/' + ('' + date.getFullYear()).slice(2);
+            },
+            /**
+             *
+             * @param {Date} date
+             * @return {Date}
+             */
+            ceilDay(date) {
+                let ceilDate = new Date(date);
+                ceilDate.setDate(ceilDate.getDate() + 1);
+                return this.floorDay(ceilDate);
+            },
+            floorDay(date) {
+                let dateFormat = new Date(date);
+                let floorDate = new Date(dateFormat.valueOf());
+                floorDate.setHours(0);
+                floorDate.setMinutes(0);
+                floorDate.setSeconds(0);
+                return floorDate;
             }
         }
     });

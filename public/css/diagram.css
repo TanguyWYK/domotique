@@ -19,6 +19,10 @@ svg {
     stroke-width: 1.3;
 }
 
+.histogram_Diagram {
+    stroke-width: 1.5;
+}
+
 .dashedLine_Diagram {
     stroke-dasharray: 8 2;
     stroke: #777;

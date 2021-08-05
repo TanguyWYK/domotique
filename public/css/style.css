@@ -24,6 +24,14 @@ li {
     align-content: center;
 }
 
+.blueDiagram{
+    fill: #3333ffcc;
+}
+
+.redDiagram{
+    fill: #ff3333cc;
+}
+
 .button{
     background-color: rgb(60, 133, 65);
     border: none;
