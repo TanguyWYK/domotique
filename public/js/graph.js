@@ -9,7 +9,8 @@ function displayGraph(measures) {
             dateEnd: 0,
             optionsTemperature: {
                 title: 'Température',
-                graph: {type: 'histogram', classStyle: 'histogram_Diagram redDiagram'},
+                //graph: {type: 'histogram', classStyle: 'histogram_Diagram redDiagram'},
+                graph: {type: 'polyline', classStyle: 'graphLine_Diagram redDiagram'},
                 id: 'temperature',
                 size_px: {x: 1000, y: 500},
                 axis: {
@@ -22,12 +23,12 @@ function displayGraph(measures) {
                     },
                     y: {
                         legend: 'temp. °C',
-                        min: 0,
-                        max: 40,
+                        min: 20,
+                        max: 30,
                         step1: 5,
                         step2: 1,
                     },
-                    crossing: {x: 0, y: 0},
+                    crossing: {x: 0, y: 20},
                 },
                 verticalLines: [],
                 horizontalLines: [
@@ -39,7 +40,8 @@ function displayGraph(measures) {
             },
             optionsHumidity: {
                 title: 'Humidité',
-                graph: {type: 'histogram', classStyle: 'histogram_Diagram blueDiagram'},
+                //graph: {type: 'histogram', classStyle: 'histogram_Diagram blueDiagram'},
+                graph: {type: 'polyline', classStyle: 'graphLine_Diagram blueDiagram'},
                 id: 'humidity',
                 size_px: {x: 1000, y: 500},
                 axis: {
@@ -52,12 +54,12 @@ function displayGraph(measures) {
                     },
                     y: {
                         legend: '% humidité',
-                        min: 0,
-                        max: 100,
+                        min: 30,
+                        max: 65,
                         step1: 10,
                         step2: 1,
                     },
-                    crossing: {x: 0, y: 0},
+                    crossing: {x: 0, y: 30},
                 },
                 verticalLines: [],
                 horizontalLines: [
@@ -92,27 +94,28 @@ function displayGraph(measures) {
         },
         computed: {
             temperatureValues() {
-                let values = {points: [], color: 'red'};
-                for (let measure of this.measures) {
-                    values.points.push({
-                        x: measure.dateTime,
-                        y: measure.temperature / 100,
-                    })
-                }
-                return [values];
+                return this.getValuesFromMeasures('temperature', 'red');
             },
             humidityValues() {
-                let values = {points: [], color: 'blue'};
-                for (let measure of this.measures) {
-                    values.points.push({
-                        x: measure.dateTime,
-                        y: measure.humidity / 100,
-                    })
-                }
-                return [values];
+                return this.getValuesFromMeasures('humidity', 'blue');
             }
         },
         methods: {
+            getValuesFromMeasures(captorParameter, color) {
+                let idCaptors = new Set;
+                let graphs = {};
+                for (let measure of this.measures) {
+                    if (!idCaptors.has(measure.id_captor)) {
+                        idCaptors.add(measure.id_captor);
+                        graphs[measure.id_captor] = {points: [], color: color};
+                    }
+                    graphs[measure.id_captor].points.push({
+                        x: measure.dateTime,
+                        y: measure[captorParameter] / 100,
+                    });
+                }
+                return Object.values(graphs);
+            },
             fillInputDateNowMinusHours(hours = 0) {
                 let now = new Date();
                 now.setHours(now.getHours() + 2 - hours);
@@ -120,11 +123,13 @@ function displayGraph(measures) {
             },
             updateGraph() {
                 postXHR('home', {
-                    action: 'readCaptorsDayAverage',
-                    id_captor: 1,
+                    action: 'readCaptors',
+                    //action: 'readCaptorsDayAverage',
+                    id_captors: JSON.stringify([1, 2, 3, 4, 5, 6]),
                     date_start: convertDateToMySQL(this.dateStart),
                     date_end: convertDateToMySQL(this.dateEnd),
                 }).then(data => {
+                    console.log(data);
                     this.measures = data;
                     this.updateSVGDiagrams();
                 });

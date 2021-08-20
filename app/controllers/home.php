@@ -7,7 +7,8 @@ if (!empty($_POST)) {
     if ($_POST['action'] === 'readCaptors') {
         $Captor = new CaptorModel();
         header('Content-type: application/json');
-        echo json_encode($Captor->getMeasuresBetweenTwoDate($_POST['id_captor'], $_POST['date_start'], $_POST['date_end']));
+        $id_captors = json_decode($_POST['id_captors']);
+        echo json_encode($Captor->getMeasuresBetweenTwoDate($id_captors, $_POST['date_start'], $_POST['date_end']));
         exit();
     } elseif ($_POST['action'] === 'readLastMeasures') {
         $Captor = new CaptorModel();

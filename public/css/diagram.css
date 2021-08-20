@@ -14,9 +14,18 @@ svg {
     shape-rendering: auto;
 }
 
+.blueDiagram{
+    fill: #3333ffcc;
+}
+
+.redDiagram{
+    fill: #ff3333cc;
+}
+
 .graphLine_Diagram {
     fill: none;
     stroke-width: 1.3;
+    shape-rendering: geometricPrecision;
 }
 
 .histogram_Diagram {

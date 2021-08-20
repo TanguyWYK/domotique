@@ -96,26 +96,31 @@ class Diagram {
         this.svgElement.appendChild(rectElement);
     }
 
-    drawExtraLines() {
+    drawExtraLines(parentElement) {
+        let svgLegendAxisElement = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        svgLegendAxisElement.setAttribute('class', 'legendAxis_Diagram');
         for (let line of this.horizontalLines) {
-            this.drawHorizontalLine(this.convertInPixelY(line.position), line.classStyle);
+            this.drawHorizontalLine(this.convertInPixelY(line.position), line.classStyle, this.svgElement);
             this.drawText(
                 this.convertInPixelX(this.axis.crossing.x) - 10,
                 this.convertInPixelY(line.position) + 2,
                 12,
-                'legendAxis_Diagram',
-                this.getLineText(line));
+                '',
+                this.getLineText(line),
+                svgLegendAxisElement);
         }
         for (let line of this.verticalLines) {
-            this.drawVerticalLine(this.convertInPixelX(line.position), line.classStyle);
+            this.drawVerticalLine(this.convertInPixelX(line.position), line.classStyle, this.svgElement);
             this.drawTextRotate(
                 this.convertInPixelX(line.position) + 5,
                 this.convertInPixelY(this.axis.crossing.y) + 12,
                 14,
                 -75,
-                'legendAxis_Diagram',
-                this.getLineText(line));
+                '',
+                this.getLineText(line),
+                svgLegendAxisElement);
         }
+        this.svgElement.appendChild(svgLegendAxisElement);
     }
 
     getLineText(line) {
@@ -123,65 +128,72 @@ class Diagram {
     }
 
     drawAxis() {
+        let svgAxisElement = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         let y = this.convertInPixelY(this.axis.crossing.y);
-        this.drawHorizontalLine(y, 'axis_Diagram');
-        this.drawArrowX(this.PADDING_LEFT + this.size_px.x, y);
+        this.drawHorizontalLine(y, 'axis_Diagram', svgAxisElement);
+        this.drawArrowX(this.PADDING_LEFT + this.size_px.x, y, svgAxisElement);
         let x = this.convertInPixelX(this.axis.crossing.x);
-        this.drawVerticalLine(x, 'axis_Diagram');
-        this.drawArrowY(x, this.HEIGHT_TITLE);
-        this.drawText(this.PADDING_LEFT + this.size_px.x, y + 20, 16, 'legendAxis_Diagram', this.axis.x.legend);
-        this.drawTextRotate(this.PADDING_LEFT - 20, this.HEIGHT_TITLE - 20, 16, -90, 'legendAxis_Diagram', this.axis.y.legend);
-        this.drawSteps();
+        this.drawVerticalLine(x, 'axis_Diagram', svgAxisElement);
+        this.drawArrowY(x, this.HEIGHT_TITLE, svgAxisElement);
+        this.drawText(this.PADDING_LEFT + this.size_px.x, y + 20, 16, 'legendAxis_Diagram', this.axis.x.legend, svgAxisElement);
+        this.drawTextRotate(this.PADDING_LEFT - 20, this.HEIGHT_TITLE - 20, 16, -90, 'legendAxis_Diagram', this.axis.y.legend, svgAxisElement);
+        let svgStepsElement = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        svgStepsElement.setAttribute('class', 'graduation_Diagram');
+        this.drawSteps(svgStepsElement);
+        svgAxisElement.appendChild(svgStepsElement);
+        this.svgElement.appendChild(svgAxisElement);
     }
 
-    drawSteps() {
+    drawSteps(parentElement) {
         let offsetX = this.axis.x.min - this.axis.x.min % this.axis.x.step2 + this.axis.x.step2;
         for (let i = offsetX; i < this.axis.x.max; i += this.axis.x.step2) {
             let x = this.convertInPixelX(i);
             let y = this.convertInPixelY(this.axis.crossing.y);
             let length = i % this.axis.x.step1 === 0 ? 8 : 3;
-            this.drawLine(x, y, x, y + length, 'graduation_Diagram');
+            this.drawLine(x, y, x, y + length, '', parentElement);
         }
         let offsetY = this.axis.y.min - this.axis.y.min % this.axis.y.step2 + this.axis.y.step2;
         for (let i = offsetY; i < this.axis.y.max; i += this.axis.y.step2) {
             let x = this.convertInPixelX(this.axis.crossing.x);
             let y = this.convertInPixelY(i);
             let length = i % this.axis.y.step1 === 0 ? 8 : 3;
-            this.drawLine(x - length, y, x, y, 'graduation_Diagram');
+            this.drawLine(x - length, y, x, y, '', parentElement);
         }
     }
 
-    drawLine(x1, y1, x2, y2, classStyle) {
+    drawLine(x1, y1, x2, y2, classStyle, parentElement) {
         let lineElement = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         lineElement.setAttribute('x1', x1);
         lineElement.setAttribute('y1', y1);
         lineElement.setAttribute('x2', x2);
         lineElement.setAttribute('y2', y2);
-        lineElement.setAttribute('class', classStyle);
-        this.svgElement.appendChild(lineElement);
+        if (classStyle !== '') {
+            lineElement.setAttribute('class', classStyle);
+        }
+        parentElement.appendChild(lineElement);
     }
 
-    drawHorizontalLine(y, classStyle) {
+    drawHorizontalLine(y, classStyle, parentElement) {
         let lineElement = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         lineElement.setAttribute('class', classStyle);
         lineElement.setAttribute('x1', this.PADDING_LEFT);
         lineElement.setAttribute('y1', y);
         lineElement.setAttribute('x2', this.PADDING_LEFT + this.size_px.x);
         lineElement.setAttribute('y2', y);
-        this.svgElement.appendChild(lineElement);
+        parentElement.appendChild(lineElement);
     }
 
-    drawVerticalLine(x, classStyle) {
+    drawVerticalLine(x, classStyle, parentElement) {
         let lineElement = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         lineElement.setAttribute('class', classStyle);
         lineElement.setAttribute('x1', x);
         lineElement.setAttribute('y1', this.HEIGHT_TITLE + this.size_px.y);
         lineElement.setAttribute('x2', x);
         lineElement.setAttribute('y2', this.HEIGHT_TITLE);
-        this.svgElement.appendChild(lineElement);
+        parentElement.appendChild(lineElement);
     }
 
-    drawArrowX(x, y) {
+    drawArrowX(x, y, parentElement) {
         let x2 = x - 5;
         let x3 = x + 12;
         let y2 = y + 5;
@@ -189,10 +201,10 @@ class Diagram {
         let arrow_x = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         arrow_x.setAttribute('d', 'M' + x2 + ' ' + y2 + 'Q' + x + ' ' + y + ' ' + x2 + ' ' + y3 + 'L' + x3 + ' ' + y + 'Z');
         arrow_x.setAttribute('class', 'axisArrow_Diagram');
-        this.svgElement.appendChild(arrow_x);
+        parentElement.appendChild(arrow_x);
     }
 
-    drawArrowY(x, y) {
+    drawArrowY(x, y, parentElement) {
         let x2 = x + 5;
         let x3 = x - 5;
         let y2 = y + 5;
@@ -200,20 +212,22 @@ class Diagram {
         let arrow_y = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         arrow_y.setAttribute('d', 'M' + x3 + ' ' + y2 + 'Q ' + x + ' ' + y + ' ' + x2 + ' ' + y2 + 'L' + x + ' ' + y3 + 'Z');
         arrow_y.setAttribute('class', 'axisArrow_Diagram');
-        this.svgElement.appendChild(arrow_y);
+        parentElement.appendChild(arrow_y);
     }
 
-    drawText(x, y, fontSize, classStyle, text) {
+    drawText(x, y, fontSize, classStyle, text, parentElement) {
         let textElement = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         textElement.setAttribute('x', x);
         textElement.setAttribute('y', y);
         textElement.setAttribute('font-size', fontSize);
-        textElement.setAttribute('class', classStyle);
+        if(classStyle!==''){
+            textElement.setAttribute('class', classStyle);
+        }
         textElement.textContent = text;
-        this.svgElement.appendChild(textElement);
+        parentElement.appendChild(textElement);
     }
 
-    drawTextRotate(x, y, fontSize, angle, classStyle, text) {
+    drawTextRotate(x, y, fontSize, angle, classStyle, text, parentElement) {
         let textElement = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         textElement.setAttribute('x', x);
         textElement.setAttribute('y', y);
@@ -223,24 +237,24 @@ class Diagram {
             'transform-origin: ' + x + 'px ' + y + 'px;' +
             'transform: rotate(' + angle + 'deg)');
         textElement.textContent = text;
-        this.svgElement.appendChild(textElement);
+        parentElement.appendChild(textElement);
     }
 
     drawTitle() {
         let fontSize = Math.round(this.size_px.y / 25) + 5;
-        this.drawText(this.size_px.x / 2 + this.PADDING_LEFT, this.HEIGHT_TITLE / 2, fontSize, 'title_Diagram', this.title);
+        this.drawText(this.size_px.x / 2 + this.PADDING_LEFT, this.HEIGHT_TITLE / 2, fontSize, 'title_Diagram', this.title, this.svgElement);
     }
 
     convertInPixelX(x) {
-        return Math.round((this.PADDING_LEFT + this.size_px.x / (this.axis.x.max - this.axis.x.min) * (x - this.axis.x.min)) * 100) / 100;
+        return Math.round((this.PADDING_LEFT + this.size_px.x / (this.axis.x.max - this.axis.x.min) * (x - this.axis.x.min)) * 10) / 10;
     }
 
     convertWidthInPixelX(width) {
-        return Math.round((this.size_px.x / (this.axis.x.max - this.axis.x.min) * width) * 100) / 100;
+        return Math.round((this.size_px.x / (this.axis.x.max - this.axis.x.min) * width) * 10) / 10;
     }
 
     convertInPixelY(y) {
-        return Math.round((this.HEIGHT_TITLE + this.size_px.y - this.size_px.y / (this.axis.y.max - this.axis.y.min) * (y - this.axis.y.min)) * 100) / 100;
+        return Math.round((this.HEIGHT_TITLE + this.size_px.y - this.size_px.y / (this.axis.y.max - this.axis.y.min) * (y - this.axis.y.min)) * 10) / 10;
     }
 
     getPositionPixels(value) {

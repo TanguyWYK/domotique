@@ -38,18 +38,18 @@ class CaptorModel
         return $query->fetchAll();
     }
 
-    public function getMeasuresBetweenTwoDate($id_captor, $date_start, $date_end)
+    public function getMeasuresBetweenTwoDate($id_captors, $date_start, $date_end)
     {
+        $string_request = str_repeat('?,', count($id_captors) - 1);
+        $string_request .= '?';
         include RELATIVE_PATH['database'] . 'connection.php';
-        $query = $db->prepare("SELECT temperature, humidity, date
+        $query = $db->prepare("SELECT id_captor,temperature, humidity, date
                                 FROM " . $db_prefix . "dht11
-                                WHERE id_captor = ? AND date BETWEEN ? AND ? 
+                                WHERE id_captor IN (" . $string_request . ") AND date BETWEEN ? AND ? 
                                 ORDER by date");
-        $query->execute([
-            $id_captor,
-            $date_start,
-            $date_end,
-        ]);
+        $query->execute(
+            array_merge($id_captors, [$date_start, $date_end])
+        );
         return $query->fetchAll();
     }
 
