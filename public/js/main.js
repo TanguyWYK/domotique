@@ -62,7 +62,7 @@ function loadView() {
     let now = new Date();
     postXHR('home', {
         action: 'readLastMeasures',
-        id_captor: 1,
+        id_captors: JSON.stringify([0,1,2,3,4])
     }).then(data => {
         displayPanel(data);
         displayGraph([]);

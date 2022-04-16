@@ -4,17 +4,19 @@
 #include <DHT.h>
 
 
-#define nbOfSensor 7
+#define nbOfSensor 5
 
-int DHTPIN[nbOfSensor] = {2,7,8,9,3,11,12}; // broche ou l'on a branche les capteurs PIN 10 BUG
-int DHTTYPE[nbOfSensor] = {DHT11,DHT22,DHT22,DHT22,DHT22,DHT22,DHT22};
+int DHTPIN[nbOfSensor] = {2,3,5,6,7}; // broche ou l'on a branche les capteurs
+int DHTTYPE[nbOfSensor] = {DHT22,DHT22,DHT22,DHT22,DHT22};
 DHT* myDHT[nbOfSensor];
 
 EthernetClient client;
 int    HTTP_PORT   = 80;
 String HTTP_METHOD = "GET";
-char   HOST_NAME[] = "192.168.0.13"; // change to your PC's IP address
-String PATH_NAME   = "/sites/domotique/save";
+//char   HOST_NAME[] = "192.168.1.12"; // change to your PC's IP address
+//String PATH_NAME   = "/sites/domotique/save";
+char   HOST_NAME[] = "twest.fr";
+String PATH_NAME   = "/domotique/save";
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xAB, 0xED };
 
 void setup(){
@@ -58,7 +60,7 @@ void loop(){
          sendRequest(queryString);
        }
     }
-    delay(300000);
+    delay(300000 - nbOfSensor * 2000);
   Serial.println("---");
 }
 

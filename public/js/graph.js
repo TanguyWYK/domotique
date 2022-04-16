@@ -23,19 +23,18 @@ function displayGraph(measures) {
                     },
                     y: {
                         legend: 'temp. °C',
-                        min: 20,
-                        max: 30,
+                        min: -5,
+                        max: 35,
                         step1: 5,
                         step2: 1,
                     },
-                    crossing: {x: 0, y: 20},
+                    crossing: {x: 0, y: 0},
                 },
                 verticalLines: [],
                 horizontalLines: [
                     {position: 10, classStyle: 'lightLine_Diagram'},
                     {position: 20, classStyle: 'lightLine_Diagram'},
                     {position: 30, classStyle: 'lightLine_Diagram'},
-                    {position: 40, classStyle: 'lightLine_Diagram'},
                 ],
             },
             optionsHumidity: {
@@ -54,12 +53,12 @@ function displayGraph(measures) {
                     },
                     y: {
                         legend: '% humidité',
-                        min: 30,
-                        max: 65,
+                        min: 0,
+                        max: 100,
                         step1: 10,
                         step2: 1,
                     },
-                    crossing: {x: 0, y: 30},
+                    crossing: {x: 0, y: 0},
                 },
                 verticalLines: [],
                 horizontalLines: [
@@ -125,7 +124,7 @@ function displayGraph(measures) {
                 postXHR('home', {
                     action: 'readCaptors',
                     //action: 'readCaptorsDayAverage',
-                    id_captors: JSON.stringify([1, 2, 3, 4, 5, 6]),
+                    id_captors: JSON.stringify([0, 1, 2, 3, 4]),
                     date_start: convertDateToMySQL(this.dateStart),
                     date_end: convertDateToMySQL(this.dateEnd),
                 }).then(data => {

@@ -5,37 +5,47 @@ function displayPanel(measures) {
         el: '#panel',
         data: {
             measures: measures,
-            numberOfMeasures: measures.length,
+            idCaptors: Object.keys(measures),
+            numberOfCaptors: measures.length,
         },
         template: `<section>
-                    <div id="date_div">
-                        <p>Dernière mesure à <span id="date">{{ date }}</span></p>
-                    </div>
-                    <div id="thermometer_div">
-                        <p>Température : <span id="temperature">{{ temperature }}</span>°C</p>
-                    </div>
-                    <div id="humidity_div">
-                        <p>Humidité air : <span id="humidity">{{ humidity }}</span>%</p>
-                    </div>
+                    <table>
+                      <tr>
+                        <th>Id</th>
+                        <th>Dernière mesure</th>
+                        <th>Température</th>
+                        <th>Humidité</th>
+                      </tr>
+                      <tr v-for="idCaptor in idCaptors">
+                        <td>{{ idCaptor }}</td>
+                        <td>{{ date(idCaptor) }}</td>
+                        <td>{{ temperature(idCaptor) }}°C</td>
+                        <td>{{ humidity(idCaptor) }}%</td>
+                      </tr>
+                    </table>
                 </section>`,
         computed: {
-            date() {
-                let date = new Date(this.lastMeasure()['date']);
+
+        },
+        methods: {
+            date(idCaptor) {
+                let date = new Date(this.lastMeasure(idCaptor)['date']);
                 let twoDigit = x => ('0' + x).slice(-2);
                 return twoDigit(date.getHours()) + ':' +
                     twoDigit(date.getMinutes()) + ':' +
                     twoDigit(date.getSeconds());
             },
-            temperature() {
-                return (this.lastMeasure().temperature / 100).toFixed(2);
+            temperature(idCaptor) {
+                return (this.lastMeasure(idCaptor).temperature / 100).toFixed(2);
             },
-            humidity() {
-                return (this.lastMeasure().humidity / 100).toFixed(2);
+            humidity(idCaptor) {
+                return (this.lastMeasure(idCaptor).humidity / 100).toFixed(2);
             },
-        },
-        methods: {
-            lastMeasure() {
-                return this.measures[this.numberOfMeasures - 1];
+            numberOfMeasures(idCaptor){
+                return this.measures[idCaptor].length;
+            },
+            lastMeasure(idCaptor) {
+                return this.measures[idCaptor][this.numberOfMeasures(idCaptor) - 1];
             }
         },
 

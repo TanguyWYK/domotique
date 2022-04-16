@@ -13,7 +13,12 @@ if (!empty($_POST)) {
     } elseif ($_POST['action'] === 'readLastMeasures') {
         $Captor = new CaptorModel();
         header('Content-type: application/json');
-        echo json_encode([$Captor->getLastMeasureDHT11($_POST['id_captor'])]);
+        $id_captors = json_decode($_POST['id_captors']);
+        $response = new ArrayObject();
+        foreach ($id_captors as $id_captor) {
+            $response[$id_captor] = [$Captor->getLastMeasureDHT22($id_captor)];
+        }
+        echo json_encode($response);
         exit();
     } elseif ($_POST['action'] === 'readCaptorsDayAverage') {
         $Captor = new CaptorModel();

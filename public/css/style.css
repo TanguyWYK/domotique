@@ -18,6 +18,16 @@ li {
     margin-bottom: 10px;
 }
 
+table{
+    border-collapse: collapse;
+}
+
+td,th{
+    border: 1px black solid;
+    text-align: center;
+    padding: 0 10px;
+}
+
 #diagrams{
     display: flex;
     flex-direction: column;
