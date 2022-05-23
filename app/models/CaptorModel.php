@@ -40,15 +40,13 @@ class CaptorModel
 
     public function getMeasuresBetweenTwoDate($id_captors, $date_start, $date_end)
     {
-        $string_request = str_repeat('?,', count($id_captors) - 1);
-        $string_request .= '?';
         include RELATIVE_PATH['database'] . 'connection.php';
-        $query = $db->prepare("SELECT id_captor,temperature, humidity, date
+        $query = $db->prepare("SELECT temperature, humidity, date
                                 FROM " . $db_prefix . "dht22
-                                WHERE id_captor IN (" . $string_request . ") AND date BETWEEN ? AND ? 
+                                WHERE id_captor= ? AND date BETWEEN ? AND ? 
                                 ORDER by date");
         $query->execute(
-            array_merge($id_captors, [$date_start, $date_end])
+            [$id_captors, $date_start, $date_end]
         );
         return $query->fetchAll();
     }
@@ -69,4 +67,23 @@ class CaptorModel
         return $query->fetchAll();
     }
 
+    public function getAllCaptorNames(){
+        include RELATIVE_PATH['database'] . 'connection.php';
+        $query = $db->prepare("SELECT id,name 
+                                FROM " . $db_prefix . "captors
+                                WHERE 1 ORDER BY id");
+        $query->execute();
+        return $query->fetchAll();
+    }
+
+    public function getCaptorNameById($id){
+        include RELATIVE_PATH['database'] . 'connection.php';
+        $query = $db->prepare("SELECT name 
+                                FROM " . $db_prefix . "captors
+                                WHERE id = ?");
+        $query->execute([
+            $id
+        ]);
+        return $query->fetch()['name'];
+    }
 }

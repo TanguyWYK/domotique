@@ -11,13 +11,13 @@ function displayPanel(measures) {
         template: `<section>
                     <table>
                       <tr>
-                        <th>Id</th>
+                        <th>Captor</th>
                         <th>Dernière mesure</th>
                         <th>Température</th>
                         <th>Humidité</th>
                       </tr>
                       <tr v-for="idCaptor in idCaptors">
-                        <td>{{ idCaptor }}</td>
+                        <td>{{ name(idCaptor)}}</td>
                         <td>{{ date(idCaptor) }}</td>
                         <td>{{ temperature(idCaptor) }}°C</td>
                         <td>{{ humidity(idCaptor) }}%</td>
@@ -42,10 +42,13 @@ function displayPanel(measures) {
                 return (this.lastMeasure(idCaptor).humidity / 100).toFixed(2);
             },
             numberOfMeasures(idCaptor){
-                return this.measures[idCaptor].length;
+                return this.measures[idCaptor].data.length;
             },
             lastMeasure(idCaptor) {
-                return this.measures[idCaptor][this.numberOfMeasures(idCaptor) - 1];
+                return this.measures[idCaptor].data[this.numberOfMeasures(idCaptor) - 1];
+            },
+            name(idCaptor){
+                return this.measures[idCaptor].captorName;
             }
         },
 

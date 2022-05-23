@@ -4,24 +4,32 @@ include_once "../headers/headers.php";
 
 
 if (!empty($_POST)) {
+    $Captor = new CaptorModel();
     if ($_POST['action'] === 'readCaptors') {
-        $Captor = new CaptorModel();
         header('Content-type: application/json');
         $id_captors = json_decode($_POST['id_captors']);
-        echo json_encode($Captor->getMeasuresBetweenTwoDate($id_captors, $_POST['date_start'], $_POST['date_end']));
+        $response = new stdClass();
+        foreach ($id_captors as $id_captor) {
+            $Measure = new stdClass();
+            $Measure->captorName = $Captor->getCaptorNameById($id_captor);
+            $Measure->data = $Captor->getMeasuresBetweenTwoDate($id_captor, $_POST['date_start'], $_POST['date_end']);
+            $response->$id_captor = $Measure;
+        }
+        echo json_encode($response);
         exit();
     } elseif ($_POST['action'] === 'readLastMeasures') {
-        $Captor = new CaptorModel();
         header('Content-type: application/json');
         $id_captors = json_decode($_POST['id_captors']);
-        $response = new ArrayObject();
+        $response = new stdClass();
         foreach ($id_captors as $id_captor) {
-            $response[$id_captor] = [$Captor->getLastMeasureDHT22($id_captor)];
+            $Measure = new stdClass();
+            $Measure->captorName = $Captor->getCaptorNameById($id_captor);
+            $Measure->data = [$Captor->getLastMeasureDHT22($id_captor)];
+            $response->$id_captor = $Measure;
         }
         echo json_encode($response);
         exit();
     } elseif ($_POST['action'] === 'readCaptorsDayAverage') {
-        $Captor = new CaptorModel();
         header('Content-type: application/json');
         echo json_encode($Captor->getDayAverageMeasuresBetweenTwoDate($_POST['id_captor'], $_POST['date_start'], $_POST['date_end']));
         exit();

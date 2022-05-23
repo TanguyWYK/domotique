@@ -48,3 +48,8 @@ td,th{
 .button:hover {
     box-shadow: 0 0 5px #000;
 }
+
+.id_captor_li{
+    display: inline-block;
+    margin-left: 20px;
+}

@@ -7,6 +7,8 @@ function displayGraph(measures) {
             measures: measures,
             dateStart: 0,
             dateEnd: 0,
+            id_captors: new Set([3, 4]),
+            captorNames: [],
             optionsTemperature: {
                 title: 'Température',
                 //graph: {type: 'histogram', classStyle: 'histogram_Diagram redDiagram'},
@@ -79,6 +81,14 @@ function displayGraph(measures) {
                             <input id="endDate" type="datetime-local" v-model="dateEnd">
                         </li>
                         <li>
+                            <ul>
+                                <li class="id_captor_li" v-for="index in 5">
+                                <input :checked="id_captors.has(index-1)" type="checkbox" @change="updateCaptors(index-1)">
+                                {{ getCaptorName(index - 1) }}
+                              </li>
+                            </ul>
+                        </li>
+                        <li>
                            <div class="button" @click="updateGraph()">Afficher</div>
                         </li>
                     </ul>
@@ -89,6 +99,9 @@ function displayGraph(measures) {
         mounted() {
             this.dateStart = this.fillInputDateNowMinusHours(24);
             this.dateEnd = this.fillInputDateNowMinusHours(0);
+            for (let idCaptor in this.measures) {
+                this.captorNames.push(this.measures[idCaptor].captorName);
+            }
             this.updateGraph();
         },
         computed: {
@@ -97,21 +110,26 @@ function displayGraph(measures) {
             },
             humidityValues() {
                 return this.getValuesFromMeasures('humidity', 'blue');
-            }
+            },
         },
         methods: {
+            getCaptorName(id) {
+                return this.captorNames[id];
+            },
             getValuesFromMeasures(captorParameter, color) {
                 let idCaptors = new Set;
                 let graphs = {};
-                for (let measure of this.measures) {
-                    if (!idCaptors.has(measure.id_captor)) {
-                        idCaptors.add(measure.id_captor);
-                        graphs[measure.id_captor] = {points: [], color: color};
+                for (let id_captor in this.measures) {
+                    if (!idCaptors.has(id_captor)) {
+                        idCaptors.add(id_captor);
+                        graphs[id_captor] = {points: [], color: color};
                     }
-                    graphs[measure.id_captor].points.push({
-                        x: measure.dateTime,
-                        y: measure[captorParameter] / 100,
-                    });
+                    for (let measure of this.measures[id_captor].data) {
+                        graphs[id_captor].points.push({
+                            x: measure.dateTime,
+                            y: measure[captorParameter] / 100,
+                        });
+                    }
                 }
                 return Object.values(graphs);
             },
@@ -120,18 +138,31 @@ function displayGraph(measures) {
                 now.setHours(now.getHours() + 2 - hours);
                 return now.toJSON().slice(0, 19);
             },
+            updateCaptors(id_captor) {
+                this.id_captors.has(id_captor)
+                    ? this.id_captors.delete(id_captor)
+                    : this.id_captors.add(id_captor);
+            },
             updateGraph() {
                 postXHR('home', {
                     action: 'readCaptors',
                     //action: 'readCaptorsDayAverage',
-                    id_captors: JSON.stringify([0, 1, 2, 3, 4]),
+                    id_captors: JSON.stringify([...this.id_captors]),
                     date_start: convertDateToMySQL(this.dateStart),
                     date_end: convertDateToMySQL(this.dateEnd),
                 }).then(data => {
-                    console.log(data);
                     this.measures = data;
-                    this.updateSVGDiagrams();
+                    if (this.isDataNotEmpty()) {
+                        this.updateSVGDiagrams();
+                    }
                 });
+            },
+            isDataNotEmpty() {
+                let dataLength = 0;
+                for (let idCaptor in this.measures) {
+                    dataLength += this.measures[idCaptor].data.length;
+                }
+                return dataLength > 0;
             },
             updateSVGDiagrams() {
                 this.initXAxis();
@@ -141,16 +172,19 @@ function displayGraph(measures) {
                 diagram_div.append(temperatureDiagram.getDiagramElement());
                 let humidityDiagram = new Diagram(this.optionsHumidity, this.humidityValues);
                 diagram_div.append(humidityDiagram.getDiagramElement());
-                console.log('update');
             },
             initXAxis() {
                 this.changeXAxis(this.optionsTemperature);
                 this.changeXAxis(this.optionsHumidity);
-                for (let measure of this.measures) {
-                    if (this.isOnlyDate(measure.date)) {
-                        measure.dateTime = new Date(measure.date + ' 14:00:00').getTime();
-                    } else {
-                        measure.dateTime = new Date(measure.date).getTime();
+                for (let captorId in this.measures) {
+                    let data = this.measures[captorId].data;
+                    for (let measureId in data) {
+                        let measure = data[measureId];
+                        if (this.isOnlyDate(measure.date)) {
+                            this.measures[captorId].data[measureId].dateTime = new Date(measure.date + ' 14:00:00').getTime();
+                        } else {
+                            this.measures[captorId].data[measureId].dateTime = new Date(measure.date).getTime();
+                        }
                     }
                 }
                 this.addVerticalLineByDay(this.optionsTemperature);

@@ -2,11 +2,13 @@
 
 include_once "../headers/headers.php";
 
-if(isset($_GET)){
+if (isset($_POST) && !empty($_POST['t']) && !empty($_POST['h'])) {
     $Captor = new CaptorModel();
-    $Captor->setNewMeasureDHT22($_GET['id_captor'],$_GET['temperature'],$_GET['humidity']);
-    $queryString = "?id_captor=".$_GET['id_captor']."&temperature=".$_GET['temperature']."&humidity=".$_GET['humidity'];
-    //file_get_contents("http://www.twest.fr/domotique/save".$queryString);// Attention ne pas copier cette ligne sur twest.fr
+    $temperatures = json_decode($_POST['t']);
+    $humidities = json_decode($_POST['h']);
+    for ($i = 0; $i < count($temperatures); $i++) {
+        $Captor->setNewMeasureDHT22($i, $temperatures[$i], $humidities[$i]);
+    }
 }
 
 exit;

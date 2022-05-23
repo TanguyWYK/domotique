@@ -65,7 +65,7 @@ function loadView() {
         id_captors: JSON.stringify([0,1,2,3,4])
     }).then(data => {
         displayPanel(data);
-        displayGraph([]);
+        displayGraph(data);
     });
 }
 
