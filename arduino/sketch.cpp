@@ -4,10 +4,13 @@
 #include <DHT.h>
 
 
-#define nbOfSensor 5
+#define nbOfSensor 6
+#define ERROR_VALUE -9999
 
-int DHTPIN[nbOfSensor] = {2,3,5,6,7}; // broche ou l'on a branche les capteurs
-int DHTTYPE[nbOfSensor] = {DHT22,DHT22,DHT22,DHT22,DHT22};
+int DHTPIN[nbOfSensor] = {2,3,5,6,7,8}; // broches où sont branchés les capteurs
+int DHTTYPE[nbOfSensor] = {DHT22,DHT22,DHT22,DHT22,DHT22,DHT22};
+int temperatures[nbOfSensor] = {ERROR_VALUE,ERROR_VALUE,ERROR_VALUE,ERROR_VALUE,ERROR_VALUE,ERROR_VALUE};
+int humidities[nbOfSensor] = {ERROR_VALUE,ERROR_VALUE,ERROR_VALUE,ERROR_VALUE,ERROR_VALUE,ERROR_VALUE};
 DHT* myDHT[nbOfSensor];
 
 EthernetClient client;
@@ -39,31 +42,50 @@ void setup(){
 void loop(){
    float humidity;
    float temperature;
+
    for(int i=0;i<nbOfSensor;i++){
        humidity = myDHT[i]->readHumidity();//on lit l'hygrometrie
        temperature = myDHT[i]->readTemperature();//on lit la temperature en celsius (par defaut)
        //On verifie si la lecture a echoue, si oui on quitte la boucle pour recommencer.
        if (isnan(humidity) || isnan(temperature) || humidity>100 || humidity<0 || temperature<-40 || temperature>80){
          Serial.println("Failed to read from DHT sensor!");
+         temperatures[i] = ERROR_VALUE;
+         humidities[i] = ERROR_VALUE;
        } else {
          //Affichages :
-         Serial.print(i);
-         Serial.print(" Humidite: ");
-         Serial.print(humidity);
-         Serial.print(" %\t");
-         Serial.print("Temperature: ");
-         Serial.print(temperature);
-         Serial.print(" *C ");
-         Serial.println("");
-         String queryString = "?id_captor="+String(i)+"&humidity="+String(humidity*100)+"&temperature="+String(temperature*100);
-         Serial.println(queryString);
-         sendRequest(queryString);
+        //  Serial.print(i);
+        //  Serial.print(" Humidite: ");
+        //  Serial.print(humidity);
+        //  Serial.print(" %\t");
+        //  Serial.print("Temperature: ");
+        //  Serial.print(temperature);
+        //  Serial.print(" *C ");
+        //  Serial.println("");
+         temperatures[i] = temperature * 10;
+         humidities[i] = humidity * 10;
        }
+       delay(3000);
     }
-    delay(300000 - nbOfSensor * 2000);
+    String queryString = buildQuery(temperatures,humidities);
+    Serial.println(queryString);
+    sendRequest(queryString);
+    delay(300000 - nbOfSensor * 3000);
   Serial.println("---");
 }
 
+static String buildQuery(int *temperatures, int *humidities) {
+  String temperaturesString = "";
+  String humiditiesString = "";
+  String comma = ",";
+  for(int i=0;i<nbOfSensor;i++){
+    if(i == nbOfSensor-1){
+      comma = "";
+    }
+    temperaturesString += String(temperatures[i]) + comma;
+    humiditiesString += String(humidities[i]) + comma;
+  }
+  return "?t="+temperaturesString+"&h="+humiditiesString;
+};
 
 static void sendRequest(String queryString){
    if(client.connect(HOST_NAME, HTTP_PORT)) {
@@ -74,7 +96,6 @@ static void sendRequest(String queryString){
       client.println("Connection: close");
       client.println(); // end HTTP header
       client.stop();
-      delay(2000);
     }else{
       Serial.println("error http request");
       delay(500);

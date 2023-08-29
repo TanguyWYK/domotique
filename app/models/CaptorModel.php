@@ -1,7 +1,10 @@
 <?php
 
+define('ERROR_MEASURE',-9990);
+
 class CaptorModel
 {
+
     public function setNewMeasureDHT22($id_captor, $temperature, $humidity)
     {
         include RELATIVE_PATH['database'] . 'connection.php';
@@ -19,7 +22,7 @@ class CaptorModel
         include RELATIVE_PATH['database'] . 'connection.php';
         $query = $db->prepare("SELECT temperature, humidity, date
                                 FROM " . $db_prefix . "dht22 
-                                WHERE id = (SELECT MAX(id) FROM " . $db_prefix . "dht22 WHERE id_captor = ?)");
+                                WHERE id = (SELECT MAX(id) FROM " . $db_prefix . "dht22 WHERE id_captor = ?) AND humidity <> " . ERROR_MEASURE);
         $query->execute([
             $id_captor,
         ]);
@@ -31,7 +34,7 @@ class CaptorModel
         include RELATIVE_PATH['database'] . 'connection.php';
         $query = $db->prepare("SELECT temperature, humidity, date
                                 FROM " . $db_prefix . "dht22
-                                WHERE id_captor = ? ORDER BY id DESC LIMIT " . $n);
+                                WHERE id_captor = ? AND humidity <> " . ERROR_MEASURE ."ORDER BY id DESC LIMIT " . $n);
         $query->execute([
             $id_captor,
         ]);

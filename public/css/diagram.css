@@ -42,6 +42,11 @@ svg {
     stroke-width: 0.5;
 }
 
+.strongLine_Diagram{
+    stroke: #333;
+    stroke-width: 0.7;
+}
+
 .title_Diagram {
     text-anchor: middle;
 }
